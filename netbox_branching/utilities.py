@@ -10,6 +10,7 @@ from .constants import REPLICATE_TABLES
 from .contextvars import active_branch
 
 __all__ = (
+    'BranchActionIndicator',
     'ChangeSummary',
     'DynamicSchemaDict',
     'ListHandler',
@@ -176,3 +177,15 @@ def is_api_request(request):
     Returns True if the given request is a REST or GraphQL API request.
     """
     return request.path_info.startswith(reverse('api-root')) or request.path_info.startswith(reverse('graphql'))
+
+
+@dataclass
+class BranchActionIndicator:
+    """
+    An indication of whether a particular branch action is permitted. If not, an explanatory message must be provided.
+    """
+    permitted: bool
+    message: str = ''
+
+    def __bool__(self):
+        return self.permitted
