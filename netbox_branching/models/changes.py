@@ -57,8 +57,8 @@ class ObjectChange(ObjectChange_):
                 logger.debug(f'{model._meta.verbose_name} ID {self.changed_object_id} already deleted; skipping')
 
         # Rebuild the MPTT tree where applicable
-        if issubclass(model, MPTTModel):
-            model.objects.rebuild()
+        #if issubclass(model, MPTTModel):
+        #    model.objects.rebuild()
 
     apply.alters_data = True
 
@@ -92,8 +92,8 @@ class ObjectChange(ObjectChange_):
             instance.save(using=using)
 
         # Rebuild the MPTT tree where applicable
-        if issubclass(model, MPTTModel):
-            model.objects.rebuild()
+        #if issubclass(model, MPTTModel):
+        #    model.objects.rebuild()
 
     undo.alters_data = True
 

@@ -14,6 +14,7 @@ from django.test import RequestFactory
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from mptt.models import MPTTModel   
 
 from core.models import ObjectChange as ObjectChange_
 from netbox.config import get_config
@@ -344,10 +345,13 @@ class Branch(JobsMixin, PrimaryModel):
         post_save.connect(handler, sender=ObjectChange_, weak=False)
 
         try:
+            changed_models = []
             with transaction.atomic():
                 # Apply each change from the Branch
                 for change in changes:
                     with event_tracking(request):
+                        if change.changed_object_type.model_class() not in changed_models:
+                            changed_models.append(change.changed_object_type.model_class())
                         request.id = change.request_id
                         request.user = change.user
                         change.apply(using=DEFAULT_DB_ALIAS, logger=logger)
@@ -361,6 +365,11 @@ class Branch(JobsMixin, PrimaryModel):
             post_save.disconnect(handler, sender=ObjectChange_)
             Branch.objects.filter(pk=self.pk).update(status=BranchStatusChoices.READY)
             raise e
+
+        logger.debug(f"MPTT Model Change deleted, rebuilding tree")
+        for changed_model in changed_models:
+            if issubclass(changed_model, MPTTModel):
+                changed_model.objects.rebuild()
 
         # Update the Branch's status to "merged"
         logger.debug(f"Setting branch status to {BranchStatusChoices.MERGED}")
