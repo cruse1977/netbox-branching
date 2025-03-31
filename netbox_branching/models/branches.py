@@ -366,7 +366,7 @@ class Branch(JobsMixin, PrimaryModel):
             Branch.objects.filter(pk=self.pk).update(status=BranchStatusChoices.READY)
             raise e
 
-        logger.debug(f"MPTT Model Change deleted, rebuilding tree")
+        logger.debug(f"MPTT Model Change detected, rebuilding tree")
         for changed_model in changed_models:
             if issubclass(changed_model, MPTTModel):
                 changed_model.objects.rebuild()
